@@ -1,13 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-	<head>
-		<title>Go/HTMX Index</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link href="../styles/output.css" rel="stylesheet">
-	</head>
-	<body>
-		<p class="text-red-500">Hello world!</p>	
-	</body>
-	<script src="../scripts/htmx.min.js"></script>
+  <head>
+    <title>Chat Router</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="../styles/output.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body class="bg-zinc-50 dark:bg-zinc-700">
+    <p class="text-blue-500 text-center text-4xl pt-12">Hello!</p>
+    <form class="flex justify-center pt-24" hx-post="/api/name-set">
+      <div class="flex flex-col justify-center">
+        <div class="input-group text-blue-500">
+          <input
+            class="bg-transparent underlinedInput w-full"
+            required
+            id="name"
+            name="name"
+            type="text"
+            hx-post="/api/validate"
+            hx-trigger="change"
+          />
+          <span class="bar"></span>
+          <label class="underlinedInputLabel bg-transparent w-1/2">Name</label>
+        </div>
+        <div class="flex justify-end">
+          <button
+            class="text-lg mt-2 text-white py-2 px-4 w-fit rounded-md shadow-md bg-blue-500 hover:bg-blue-600 active:scale-90 transition-all duration-300 ease-in-out"
+            type="submit"
+          >
+            Set
+          </button>
+        </div>
+      </div>
+    </form>
+  </body>
+  <script src="../scripts/htmx.min.js"></script>
 </html>
