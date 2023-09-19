@@ -32,6 +32,9 @@ func getChat(writer http.ResponseWriter, request *http.Request) {
 	//fmt.Printf("got /chat request\n")
 	http.ServeFile(writer, request, "./src/templates/chat.html")
 }
+func getAbout(writer http.ResponseWriter, request *http.Request) {
+	http.ServeFile(writer, request, "./src/templates/about.html")
+}
 
 // api
 func apiNameSet(writer http.ResponseWriter, request *http.Request) {
@@ -74,6 +77,27 @@ func apiValidate(writer http.ResponseWriter, request *http.Request) {
 	cleanedName := html.EscapeString(name)
 
 	fmt.Println("Recieved Name: ", cleanedName)
+
+	if cleanedName != params.Get("name") {
+		htmlres := fmt.Sprintf(`<p class="bad-response">You're input contains invalid characters, reading: %s</p>`, cleanedName)
+		writer.Header().Set("Content-Type", "text/html")
+		fmt.Fprint(writer, htmlres)
+	} else if len(cleanedName) < 3 {
+		htmlres := `<p class="bad-response fade-in">Name must be at least 3 characters long</p>`
+		writer.Header().Set("Content-Type", "text/html")
+		fmt.Fprint(writer, htmlres)
+	} else {
+		htmlres := `<div class="flex-end-container">
+            <button
+              class="set-btn fade-in"
+              type="submit"
+            >
+              Set
+            </button>
+          </div>`
+		writer.Header().Set("Content-Type", "text/html")
+		fmt.Fprint(writer, htmlres)
+	}
 }
 
 // websocket
@@ -126,6 +150,7 @@ func main() {
 
 	mux.HandleFunc("/", getRoot)
 	mux.HandleFunc("/chat", getChat)
+	mux.HandleFunc("/about", getAbout)
 	mux.HandleFunc("/chat/ws", handleConnections)
 	mux.HandleFunc("/api/validate", apiValidate)
 	mux.HandleFunc("/api/name-set", apiNameSet)

@@ -7,9 +7,19 @@
     <link href="../styles/output.css" type="text/css" rel="stylesheet" />
   </head>
   <body class="bg-zinc-50 dark:bg-zinc-700">
-    <p class="text-blue-500 text-center text-4xl pt-12">Hello!</p>
+    <div class="flex pt-12 justify-center">
+      <p class="text-blue-500 text-center text-4xl ml-24">Hello!</p>
+      <a
+        href="about"
+        class="hover-underline-animation text-sm ml-4 tracking-wide text-zinc-800 italic pt-4 underline-offset-4 dark:text-zinc-200"
+        >What is this?</a
+      >
+    </div>
     <form class="flex justify-center pt-24" hx-post="/api/name-set">
       <div class="flex flex-col justify-center">
+        <p class="text-xl text-blue-400">
+          Let's start with setting a name for the session!
+        </p>
         <div class="input-group text-blue-500">
           <input
             class="bg-transparent underlinedInput w-full"
@@ -17,20 +27,15 @@
             id="name"
             name="name"
             type="text"
+            placeholder=" "
+            hx-trigger="keyup changed delay:300ms"
             hx-post="/api/validate"
-            hx-trigger="change"
+            hx-target="#validation-response"
           />
           <span class="bar"></span>
           <label class="underlinedInputLabel bg-transparent w-1/2">Name</label>
         </div>
-        <div class="flex justify-end">
-          <button
-            class="text-lg mt-2 text-white py-2 px-4 w-fit rounded-md shadow-md bg-blue-500 hover:bg-blue-600 active:scale-90 transition-all duration-300 ease-in-out"
-            type="submit"
-          >
-            Set
-          </button>
-        </div>
+        <div id="validation-response"></div>
       </div>
     </form>
   </body>
