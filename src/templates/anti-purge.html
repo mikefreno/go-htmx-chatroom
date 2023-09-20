@@ -1,0 +1,23 @@
+<!--this file is used to include listed tailwind classes in  ../styles/output.css-->
+<!--name set response -->
+<div class="fade-in flex flex-col justify-center">
+  <p>Hey, %s.</p>
+  <a class="set-btn" href="/">Change Name?</a>
+  <form hx-target="#body" hx-post="/api/getChannels">
+    <button class="set-btn" type="submit">Join channel</button>
+    <input value="%s" class="hidden" name="name" />
+  </form>
+</div>
+<!--validation res -->
+<div class="flex justify-end"></div>
+<!--getChannels-->
+<body class="page-fade-in w-full bg-zinc-50 dark:bg-zinc-800">
+  <div
+    class="fixed mx-auto border border-zinc-800 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-700 shadown-2xl rounded-sm px-8 py-6"
+  >
+    <button class="set-btn">Create New</button>
+    <h3 class="text-3xl">Populated Channels</h3>
+
+    <h3 class="text-3xl">Unpopulated Channels</h3>
+  </div>
+</body>

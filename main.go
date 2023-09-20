@@ -36,29 +36,23 @@ func getAbout(writer http.ResponseWriter, request *http.Request) {
 	http.ServeFile(writer, request, "./src/templates/about.html")
 }
 
-// api
-func apiNameSet(writer http.ResponseWriter, request *http.Request) {
-	if request.Method != http.MethodPost {
-		http.Error(writer, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
-	fmt.Printf("got api/name-set request\n")
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		http.Error(writer, "Error reading request body", http.StatusBadRequest)
-		return
-	}
-	fmt.Println("Body:", string(body))
+// utilities
+func cleanInput(string string) string {
+	regex := regexp.MustCompile("[^a-zA-Z]+")
+	regex2 := regexp.MustCompile("(?i)[^a-z]+|script")
+	firstPass := regex.ReplaceAllString(string, "")
+	secondPass := regex2.ReplaceAllString(firstPass, "")
+	return html.EscapeString(secondPass)
 }
 
+// api
 func apiValidate(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodPost {
 		http.Error(writer, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	fmt.Printf("got api/validate request\n")
+	//fmt.Printf("got api/validate request\n")
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		http.Error(writer, "Error reading request body", http.StatusBadRequest)
@@ -69,35 +63,68 @@ func apiValidate(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "Error parsing body", http.StatusInternalServerError)
 		return
 	}
-	name := params.Get("name")
-	regex := regexp.MustCompile("[^a-zA-Z]+")
-	regex2 := regexp.MustCompile("(?i)[^a-z]+|script")
-	name = regex.ReplaceAllString(name, "")
-	name = regex2.ReplaceAllString(name, "")
-	cleanedName := html.EscapeString(name)
-
-	fmt.Println("Recieved Name: ", cleanedName)
+	cleanedName := cleanInput(params.Get("name"))
+	//fmt.Println("Recieved Name: ", cleanedName)
 
 	if cleanedName != params.Get("name") {
-		htmlres := fmt.Sprintf(`<p class="bad-response">You're input contains invalid characters, reading: %s</p>`, cleanedName)
+		htmlres := fmt.Sprintf(`<p class="fade-in mt-2 italic text-red-400">You're input contains invalid characters, reading: %s</p>`, cleanedName)
 		writer.Header().Set("Content-Type", "text/html")
 		fmt.Fprint(writer, htmlres)
 	} else if len(cleanedName) < 3 {
-		htmlres := `<p class="bad-response fade-in">Name must be at least 3 characters long</p>`
+		htmlres := `<p class="fade-in mt-2 italic text-red-400">Name must be at least 3 characters long</p>`
 		writer.Header().Set("Content-Type", "text/html")
 		fmt.Fprint(writer, htmlres)
 	} else {
-		htmlres := `<div class="flex-end-container">
-            <button
-              class="set-btn fade-in"
-              type="submit"
-            >
-              Set
-            </button>
-          </div>`
+		htmlres := `
+		<div class="flex justify-end">
+			<button class="set-btn fade-in" type="submit">Set</button>
+		</div>`
 		writer.Header().Set("Content-Type", "text/html")
 		fmt.Fprint(writer, htmlres)
 	}
+}
+
+func apiNameSet(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodPost {
+		http.Error(writer, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	//fmt.Printf("got api/name-set request\n")
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		http.Error(writer, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	params, err := url.ParseQuery(string(body))
+	if err != nil {
+		http.Error(writer, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	cleanedName := cleanInput(params.Get("name"))
+	htmlres := fmt.Sprintf(`
+		<div class="fade-in flex flex-col justify-center">
+			<p>Hey, %s.</p>
+			<a class="set-btn" href="/">Change Name?</a>
+			<form hx-target="#body" hx-post="/api/getChannels">
+				<button class="set-btn" type="submit">Join channel</button>
+				<input value="%s" class="hidden" name="name">
+			</form>
+		</div>`, cleanedName, cleanedName)
+	writer.Header().Set("Content-Type", "text/html")
+	fmt.Fprint(writer, htmlres)
+}
+func apiGetChannels(writer http.ResponseWriter, request *http.Request) {
+	htmlres := `
+	<body class="page-fade-in w-full bg-zinc-50 dark:bg-zinc-800">
+		<div class="fixed mx-auto border border-zinc-800 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-700 shadown-2xl rounded-sm px-8 py-6">
+		    <button class="set-btn">Create New</button>
+		    <h3 class="text-3xl">Populated Channels</h3>
+		    <h3 class="text-3xl">Unpopulated Channels</h3>
+		</div>
+	</body>`
+	writer.Header().Set("Content-Type", "text/html")
+	fmt.Fprint(writer, htmlres)
 }
 
 // websocket
@@ -154,10 +181,11 @@ func main() {
 	mux.HandleFunc("/chat/ws", handleConnections)
 	mux.HandleFunc("/api/validate", apiValidate)
 	mux.HandleFunc("/api/name-set", apiNameSet)
+	mux.HandleFunc("/api/getChannels", apiGetChannels)
 
 	go handleMessages()
 
-	err := http.ListenAndServe("127.0.0.1:3333", mux)
+	err := http.ListenAndServe(":8080", mux)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {

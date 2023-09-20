@@ -14,18 +14,12 @@
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 300ms ease-in-out !important;
 }
-
 .set-btn:hover {
   background-color: #2563eb;
 }
 
 .set-btn:active {
   transform: scale(0.9);
-}
-
-.flex-end-container {
-  display: flex;
-  justify-content: flex-end;
 }
 
 .input-group,
@@ -153,13 +147,6 @@ label.underlinedInputLabel {
     color: rgba(255, 255, 255, 0.8);
   }
 }
-
-.bad-response {
-  margin-top: 0.5rem;
-  font-style: italic;
-  color: #f87171;
-}
-
 .page-fade-in {
   opacity: 0;
   animation: fade-in 1s ease-in forwards;
