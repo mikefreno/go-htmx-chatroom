@@ -26,14 +26,14 @@ type Message struct {
 // pages
 func getRoot(writer http.ResponseWriter, request *http.Request) {
 	//fmt.Printf("got / request\n")
-	http.ServeFile(writer, request, "./src/templates/index.html")
+	http.ServeFile(writer, request, getPath("/src/templates/index.html"))
 }
 func getChat(writer http.ResponseWriter, request *http.Request) {
 	//fmt.Printf("got /chat request\n")
-	http.ServeFile(writer, request, "./src/templates/chat.html")
+	http.ServeFile(writer, request, getPath("/src/templates/chat.html"))
 }
 func getAbout(writer http.ResponseWriter, request *http.Request) {
-	http.ServeFile(writer, request, "./src/templates/about.html")
+	http.ServeFile(writer, request, getPath("/src/templates/about.html"))
 }
 
 // utilities
@@ -43,6 +43,11 @@ func cleanInput(string string) string {
 	firstPass := regex.ReplaceAllString(string, "")
 	secondPass := regex2.ReplaceAllString(firstPass, "")
 	return html.EscapeString(secondPass)
+}
+
+func getPath(relativePath string) string {
+	pathPrefix := os.Getenv("PATH_PREFIX")
+	return fmt.Sprintf("%s/%s", pathPrefix, relativePath)
 }
 
 // api
@@ -168,11 +173,11 @@ func handleMessages() {
 }
 
 func main() {
-	mux := http.NewServeMux()
 
-	js_fs := http.FileServer(http.Dir("./src/scripts"))
+	mux := http.NewServeMux()
+	js_fs := http.FileServer(http.Dir(getPath("/src/scripts")))
 	mux.Handle("/scripts/", http.StripPrefix("/scripts", js_fs))
-	css_fs := http.FileServer(http.Dir("./src/styles"))
+	css_fs := http.FileServer(http.Dir(getPath("/src/styles")))
 	mux.Handle("/styles/", http.StripPrefix("/styles", css_fs))
 
 	mux.HandleFunc("/", getRoot)

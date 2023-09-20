@@ -1,3 +1,4 @@
+
 # Build the application from source from golang image
 FROM golang:latest AS build-stage
 
@@ -17,11 +18,15 @@ FROM gcr.io/distroless/base-debian11 AS build-release-stage
 
 WORKDIR /app
 
-# Copy binary file main from build-stage to /app directory
+ENV PATH_PREFIX=/app
+# Copy everything from build-stage to /app directory in our build-release-stage
 COPY --from=build-stage /app/main /app/main
+COPY --from=build-stage /app/src/scripts /app/src/scripts
+COPY --from=build-stage /app/src/styles /app/src/styles
+COPY --from=build-stage /app/src/templates /app/src/templates
+
 EXPOSE 8080
 
 USER nonroot:nonroot
 
 ENTRYPOINT ["/app/main"]
-
